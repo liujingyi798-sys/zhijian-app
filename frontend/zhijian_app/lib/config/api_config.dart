@@ -1,7 +1,7 @@
 /// API configuration for 智健 backend.
 class ApiConfig {
   // Change this to your backend URL
-  static const String baseUrl = 'http://localhost:8000'; // Windows / iOS simulator
+  static const String baseUrl = 'https://desirable-reverence-production-eb30.up.railway.app'; // Railway prod
   // For iOS simulator, use: 'http://localhost:8000'
   // For real device, use your machine's local IP
 
