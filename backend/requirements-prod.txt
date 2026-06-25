@@ -1,0 +1,18 @@
+# 智健 Production Dependencies (for Railway deployment)
+# Vision/ML packages excluded — not needed for API + LLM serving
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+sqlalchemy==2.0.30
+aiosqlite==0.20.0
+pydantic==2.7.3
+pydantic-settings==2.3.3
+python-multipart==0.0.9
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+httpx==0.27.0
+bcrypt==4.1.3
+pillow==10.3.0
+numpy==1.26.4
+openai==1.35.1
+python-dotenv==1.0.1
+aiofiles==24.1.0
