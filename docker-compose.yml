@@ -1,0 +1,68 @@
+version: "3.9"
+
+services:
+  # ── PostgreSQL ───────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: zhijian
+      POSTGRES_USER: zhijian
+      POSTGRES_PASSWORD: zhijian
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zhijian"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── Redis ────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+
+  # ── MinIO (S3-compatible object storage) ─────────────
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: zhijian
+      MINIO_ROOT_PASSWORD: zhijian123
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web console
+    volumes:
+      - minio_data:/data
+
+  # ── FastAPI Backend ──────────────────────────────────
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      ZHIJIAN_DATABASE_URL: "postgresql+asyncpg://zhijian:zhijian@postgres:5432/zhijian"
+      ZHIJIAN_DATABASE_URL_SYNC: "postgresql://zhijian:zhijian@postgres:5432/zhijian"
+      ZHIJIAN_REDIS_URL: "redis://redis:6379/0"
+      ZHIJIAN_S3_ENDPOINT: "http://minio:9000"
+      ZHIJIAN_DEBUG: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  pgdata:
+  minio_data:

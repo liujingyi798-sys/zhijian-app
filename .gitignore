@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+.venv/
+venv/
+.env
+
+# Flutter
+frontend/zhijian_app/.dart_tool/
+frontend/zhijian_app/.packages
+frontend/zhijian_app/build/
+frontend/zhijian_app/.flutter-plugins*
+frontend/zhijian_app/pubspec.lock
+
+# Docker
+pgdata/
+minio_data/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+.env
