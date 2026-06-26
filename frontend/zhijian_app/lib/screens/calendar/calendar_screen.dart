@@ -166,18 +166,31 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   final isToday = _isToday(date);
                   final isSelected = _selectedDay != null && _dateKey(_selectedDay!) == key;
 
+                  final isPast = date.isBefore(DateTime.now()) || isToday;
+                  final canUpload = isPast;
+
                   return GestureDetector(
-                    onTap: () {
+                    onTap: canUpload ? () {
                       setState(() => _selectedDay = date);
                       _showDayDetail(context, date, key, hasPhoto);
-                    },
+                    } : null,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isSelected
-                            ? ZhiJianTheme.primary.withOpacity(0.2)
-                            : hasPhoto ? ZhiJianTheme.surfaceLight : ZhiJianTheme.surface.withOpacity(0.3),
+                        color: isToday
+                            ? ZhiJianTheme.primary.withOpacity(0.15)
+                            : isSelected
+                                ? ZhiJianTheme.primary.withOpacity(0.2)
+                                : hasPhoto
+                                    ? ZhiJianTheme.surfaceLight
+                                    : canUpload
+                                        ? ZhiJianTheme.surface.withOpacity(0.5)
+                                        : ZhiJianTheme.surface.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(8),
-                        border: isToday ? Border.all(color: ZhiJianTheme.primary, width: 2) : null,
+                        border: isToday
+                            ? Border.all(color: ZhiJianTheme.primary, width: 2)
+                            : isSelected
+                                ? Border.all(color: ZhiJianTheme.primary.withOpacity(0.5))
+                                : null,
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -187,27 +200,38 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               child: Container(
                                 margin: const EdgeInsets.all(2),
                                 decoration: BoxDecoration(
-                                  color: ZhiJianTheme.primary.withOpacity(0.15),
+                                  color: ZhiJianTheme.primary.withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                child: const Center(child: Icon(Icons.person, size: 18, color: ZhiJianTheme.textSecondary)),
+                                child: const Center(
+                                  child: Icon(Icons.fitness_center, size: 16, color: ZhiJianTheme.primary),
+                                ),
+                              ),
+                            )
+                          else if (canUpload)
+                            Expanded(
+                              child: Center(
+                                child: isToday
+                                    ? const Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                        Icon(Icons.camera_alt, size: 18, color: ZhiJianTheme.primary),
+                                        SizedBox(height: 1),
+                                        Text('打卡', style: TextStyle(fontSize: 9, color: ZhiJianTheme.primary, fontWeight: FontWeight.bold)),
+                                      ])
+                                    : const Icon(Icons.add, size: 16, color: ZhiJianTheme.textSecondary),
                               ),
                             )
                           else
-                            Expanded(
-                              child: Center(
-                                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                  const Icon(Icons.add_photo_alternate_outlined, size: 16, color: ZhiJianTheme.textSecondary),
-                                  if (isToday) const Text('上传', style: TextStyle(fontSize: 9, color: ZhiJianTheme.primary)),
-                                ]),
-                              ),
-                            ),
-                          Text('$dayNum', style: TextStyle(fontSize: 11,
+                            const Expanded(child: SizedBox.shrink()),
+                          Text(
+                            '$dayNum',
+                            style: TextStyle(
+                              fontSize: 11,
                               fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                              color: isToday ? ZhiJianTheme.primary : ZhiJianTheme.textSecondary)),
-                          if (dayData?.streakDay == true)
-                            Container(width: 4, height: 4, margin: const EdgeInsets.only(bottom: 2),
-                                decoration: const BoxDecoration(shape: BoxShape.circle, color: ZhiJianTheme.primary)),
+                              color: canUpload
+                                  ? (hasPhoto ? ZhiJianTheme.text : ZhiJianTheme.textSecondary)
+                                  : ZhiJianTheme.textSecondary.withOpacity(0.4),
+                            ),
+                          ),
                         ],
                       ),
                     ),
