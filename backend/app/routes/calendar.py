@@ -170,6 +170,35 @@ async def get_day_detail(user_id: str, date_str: str, db: AsyncSession = Depends
     }
 
 
+class MoodRequest(BaseModel):
+    user_id: str
+    date: str
+    mood: str
+
+@router.post("/mood")
+async def submit_mood(req: MoodRequest, db: AsyncSession = Depends(get_db)):
+    """Submit or update a mood check-in for a specific date."""
+    from app.models.photo import MoodCheckin
+    from app.models import gen_uuid
+    d = date.fromisoformat(req.date)
+
+    # Check existing
+    result = await db.execute(
+        select(MoodCheckin)
+        .where(MoodCheckin.user_id == req.user_id)
+        .where(MoodCheckin.checkin_date == d)
+    )
+    existing = result.scalar_one_or_none()
+
+    if existing:
+        existing.mood = req.mood
+    else:
+        db.add(MoodCheckin(id=gen_uuid(), user_id=req.user_id, checkin_date=d, mood=req.mood))
+
+    await db.commit()
+    return {"status": "ok", "date": req.date, "mood": req.mood}
+
+
 @router.get("/heatmap")
 async def get_year_heatmap(user_id: str, year: int, db: AsyncSession = Depends(get_db)):
     """Get annual check-in heatmap data (GitHub-style grid)."""

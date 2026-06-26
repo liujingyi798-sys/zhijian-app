@@ -20,6 +20,20 @@ class ApiService {
     if (_authToken != null) 'Authorization': 'Bearer $_authToken',
   };
 
+  // ── User / Auth ──────────────────────────────────────────
+
+  Future<Map<String, dynamic>> getMe(String token) async {
+    final res = await http.get(
+      Uri.parse('$baseUrl/api/auth/me'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+      return data['user'] ?? {};
+    }
+    throw Exception('Failed to get user data');
+  }
+
   // ── Health ──────────────────────────────────────────────
 
   Future<bool> healthCheck() async {

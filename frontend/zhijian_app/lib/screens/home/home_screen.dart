@@ -48,6 +48,20 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     _scanAnimation = Tween(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _scanController, curve: Curves.easeInOut),
     );
+    _loadStreakData();
+  }
+
+  Future<void> _loadStreakData() async {
+    final auth = context.read<AuthService>();
+    if (!auth.isLoggedIn) return;
+    try {
+      final data = await _api.getMe(auth.token!);
+      setState(() {
+        _streakDays = data['streak_days'] ?? 0;
+        _totalDays = data['total_days'] ?? 0;
+      });
+    } catch (_) {}
+  }
   }
 
   @override
@@ -97,6 +111,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           _plan = PlanModel.fromJson(response['plan'] ?? {});
           _state = HomeState.done;
         });
+        _loadStreakData(); // Refresh streak after successful upload
       }
     } catch (e) {
       setState(() {
